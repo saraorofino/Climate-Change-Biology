@@ -1,0 +1,8 @@
+---
+title: "Energy Mix"
+author: "Sara Orofino"
+date: "10/3/2019"
+output: html_document
+---
+
+I think it's probably a good idea to try and keep things separate so the work flow is easier to follow. We can use this rmd to figure out a code for how to select energy mixes from a (normal?) distribution weighted by how much energy they are likely to provide. 
