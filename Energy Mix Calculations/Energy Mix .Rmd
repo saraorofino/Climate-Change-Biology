@@ -6,3 +6,54 @@ output: html_document
 ---
 
 I think it's probably a good idea to try and keep things separate so the work flow is easier to follow. We can use this rmd to figure out a code for how to select energy mixes from a (normal?) distribution weighted by how much energy they are likely to provide. 
+
+There are seven kinds of energy to choose from:
+ - Carbon Capture and Storage (cc)
+ - Solar (s)
+ - Wind (w)
+ - Solar and wind co-location (sw)
+ - Geothermal (g)
+ - Biofuel (b)
+ - Nuclear (n)
+ 
+Goal: to meet global demand (demand) by randomly selecting a mix of energy from the seven sources above using weights for how much energy is likely to be contributed by each source. 
+
+Parameters:
+demand - Global energy demand (TWh); determined from literature (more than 23,000 TWh?)
+weights for each of the seven energy types - determined by the different groups researching each energy type (wt_energytype)
+
+
+Total Energy Demand equation: The total energy demand (for example 23,000 TWh or 100%) is the sum of the amount (or percent) of energy from the seven different types
+```{r}
+
+# Function for total energy demand
+demand <- function(cc, s, w, sw, g, b, n) {
+  demand <- cc + s + + w + sw + g + b + n
+}
+
+```
+
+How do we determine how much energy comes from each source?
+
+Maybe we can use random number generators with a mean and standard deviation from the literature for how much energy could be supplied from each source. Alternatively, use a random number generator with a mean of 0 and standard deviation of 1 and multiply by the weight for each energy type.
+ 
+For example let's use solar
+Say that solar and wind energy has the potential to contribute (on average) 7% of global energy demand or 1610 TWh and has a standard deviation of 257 TWh
+ 
+```{r}
+# To calculate a numeric value - use the mean and standard deviation (this is made up data)
+sw_1 <- rnorm(1, 1610, 257)
+
+#To calculate a percent - use 7% and the standard deviation (this is made up data)
+sw_2 <- rnorm(1, 7, 1)
+```
+ 
+Is there a way to generate seven numbers that all add up to 100? (AKA different %s of energy that add up to 100% of demand)
+
+
+
+
+
+
+
+
