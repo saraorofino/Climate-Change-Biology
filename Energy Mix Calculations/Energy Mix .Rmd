@@ -4,8 +4,12 @@ author: "Sara Orofino"
 date: "10/3/2019"
 output: html_document
 ---
+Packages:
+```{r packages}
+library(tidyverse)
+```
 
-I think it's probably a good idea to try and keep things separate so the work flow is easier to follow. We can use this rmd to figure out a code for how to select energy mixes from a (normal?) distribution weighted by how much energy they are likely to provide. 
+I think it's probably a good idea to try and keep things separate so the work flow is easier to follow. We can use this rmd to figure out a code for how to select an energy mix that meets global demand. 
 
 There are seven kinds of energy to choose from:
  - Carbon Capture and Storage (cc)
@@ -19,8 +23,7 @@ There are seven kinds of energy to choose from:
 Goal: to meet global demand (demand) by randomly selecting a mix of energy from the seven sources above using weights for how much energy is likely to be contributed by each source. 
 
 Parameters:
-demand - Global energy demand (TWh); determined from literature (more than 23,000 TWh?)
-weights for each of the seven energy types - determined by the different groups researching each energy type (wt_energytype)
+demand - Global energy demand (TWh); determined from literature (let's say 23000 TWh for now)
 
 
 Total Energy Demand equation: The total energy demand (for example 23,000 TWh or 100%) is the sum of the amount (or percent) of energy from the seven different types
@@ -50,7 +53,77 @@ sw_2 <- rnorm(1, 7, 1)
  
 Is there a way to generate seven numbers that all add up to 100? (AKA different %s of energy that add up to 100% of demand)
 
+**Okay let's try something different**
 
+If we know what percent of global demand each source could potentially match we can determine how many TWh should be in each energy "bucket". We then draw 23000 TWh at random from the seven different buckets. 
+
+For example here's some made up numbers on the percent of global demand each energy source could meet:
+- Carbon Capture and Storage (30%)
+ - Solar (50%)
+ - Wind (50%)
+ - Solar and wind co-location (10%)
+ - Geothermal (15%)
+ - Biofuel (20%)
+ - Nuclear (20%)
+ 
+ We could first determine how much TWh of energy those percentages equate to - 
+```{r}
+cc <- 23000 * 0.30
+s <- 23000 * 0.50
+w <- 23000 * 0.50
+sw <- 23000 * 0.10
+g <- 23000 * 0.15
+b <- 23000 * 0.20
+n <- 23000 * 0.20
+
+# Acutally this part might be unnecessary
+```
+ 
+Then we need to draw 23000 TWh of energy (one TWh at a time) based on the probabilities above. I think we might be able to do this using sample()
+
+```{r}
+
+# First create a vector of elements to sample from (in this case all of our energy types)
+energy <- c("cc", "s", "w", "sw", "g", "b", "n")
+
+#Assign n the value of how many samples we want to take (we need to draw 23000 energy types if each one represents just 1 TWh)
+n <- 23000 
+
+#Create a vector of the probabilities associated with drawing each type of energy (this comes from the energy groups)
+## Important to enter the probabilities in the same order as the energy types are listed 
+probs <- c(0.30, 0.50, 0.50, 0.10, 0.15, 0.20, 0.20)
+
+#Now run the sample function:
+trial_1 <- sample(energy, size = n, replace = TRUE, prob = probs)
+
+#Convert to a dataframe:
+trial_1 <- as.data.frame(trial_1)
+
+#See if these results make sense - how many times was each type of energy chosen?
+sum(trial_1$trial_1 == "cc") #3579
+sum(trial_1$trial_1 == "s") #5921
+sum(trial_1$trial_1 == "w") #5857
+sum(trial_1$trial_1 == "sw") #1205
+sum(trial_1$trial_1 == "g") #1768
+sum(trial_1$trial_1 == "b") #2354
+sum(trial_1$trial_1 == "n") #2316
+
+#Solar and wind were selected the most and had the highest probabilities; sw was the least and had the lowest probabilities. Solar and wind had the same probabilities and the numbers were similar; biofuel and nuclear had the same probabilities and the numbers were also similar. This method seems to make sense. 
+```
+
+Now is there a way to tally these that is faster than summing each one? Not sure if we need to do this but if its short and quick could be useful to know. 
+```{r}
+
+#Group by energy type and count how many in each category - mutate to add the percent of the total 
+trial1_tally <- trial_1 %>% 
+  group_by(trial_1) %>% 
+  tally() %>% 
+  rename(energy_type = "trial_1", TWh = "n") %>% 
+  mutate(percent_of_demand = round(((TWh/23000)*100), 2))
+
+```
+
+Cool now is there a way to loop this??
 
 
 
