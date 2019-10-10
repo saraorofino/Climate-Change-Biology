@@ -123,7 +123,36 @@ trial1_tally <- trial_1 %>%
 
 ```
 
-Cool now is there a way to loop this??
+Cool- now loop it....
+```{r}
+#Write the sample() code as a function but leave it in long form where every energy piece is its own row
+## Aka 23000 observations of 1 variable 
+energy_mixes_long <- function(energy){
+  out <- sample(energy, size = n, replace = TRUE, prob = probs)
+  return(as.data.frame(out) %>% 
+           rename(energy_type = "out"))
+}
+
+#Write the sample() code as a function and add the wranggling to condense the dataframe down
+## Aka 7 observations (1 for each energy type), total TWh for selected for that energy type, and % of the total energy demand
+energy_mixes_short <- function(energy){
+  out <- sample(energy, size = n, replace = TRUE, prob = probs)
+  return(as.data.frame(out) %>% 
+           rename(energy_type = "out") %>%
+           group_by(energy_type) %>% 
+           tally() %>% 
+           rename(TWh = "n") %>% 
+           mutate(percent_of_demand = round(((TWh/23000)*100), 2)))
+}
+
+#Example:
+mix1_long <- energy_mixes_long(energy)
+mix1_short <- energy_mixes_short(energy)
+
+# This is cool this seems to be working - but I don't know how to loop it so that every data frame has its own name
+
+```
+
 
 
 
