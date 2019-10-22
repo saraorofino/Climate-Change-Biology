@@ -16,9 +16,7 @@ library(tiff)
 library(raster)
 library(rgdal)
 
-str_name_solar<-'solar_potential.tif' 
-solar_raster=raster(str_name_solar)
-
-solar_potential <- readTIFF("Energy_Potential_Map/solar_potential.tif", native=TRUE)
+solar_raster <- system.file("~Documents/Github/Climate-Change-Biology/solar_potential.tif", package="raster")
+#This doesnt work... it shows up in the environment but its empty...
 ```
 
