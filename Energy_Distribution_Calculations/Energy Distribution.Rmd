@@ -1,0 +1,24 @@
+---
+title: "Energy Distribution"
+author: "Sara Orofino"
+date: "10/3/2019"
+output: html_document
+---
+
+We can use this rmd to determine the latitudinal distribution of each energy mix. I clarifed with Lee and he said each mix of energy should be assigned across the globe 1,000 different ways with weights assigned based on suitability of the area for providing that type of energy. 
+
+
+First we need to get the rasters from everyone for global potential
+read in using readTIFF(source, native = TRUE) - native will turn it into a native raster we can plot
+
+```{r read_data}
+library(tiff)
+library(raster)
+library(rgdal)
+
+str_name_solar<-'solar_potential.tif' 
+solar_raster=raster(str_name_solar)
+
+solar_potential <- readTIFF("Energy_Potential_Map/solar_potential.tif", native=TRUE)
+```
+
