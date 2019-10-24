@@ -11,12 +11,24 @@ We can use this rmd to determine the latitudinal distribution of each energy mix
 First we need to get the rasters from everyone for global potential
 read in using readTIFF(source, native = TRUE) - native will turn it into a native raster we can plot
 
-```{r read_data}
-library(tiff)
+```{r packages}
+library(sp)
+#library(tiff)
 library(raster)
-library(rgdal)
+#library(rgdal)
+```
 
-solar_raster <- system.file("~Documents/Github/Climate-Change-Biology/solar_potential.tif", package="raster")
+```{r read_data}
+# solar_raster <- system.file("~Documents/Github/Climate-Change-Biology/solar_potential.tif", package="raster")
 #This doesnt work... it shows up in the environment but its empty...
+
+# JKM edits
+# changed system.file to raster
+# removed file pathway
+# removed package = "raster"
+# moved tif file to folder "Energy_Distribution_Calculations" because none of the pathway designations were working. 
+solar_raster <- raster("solar_potential.tif")
+solar_raster
+plot(solar_raster)
 ```
 
