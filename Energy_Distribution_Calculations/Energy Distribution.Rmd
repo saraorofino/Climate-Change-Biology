@@ -32,3 +32,11 @@ solar_raster
 plot(solar_raster)
 ```
 
+
+```{r read_data}
+#wind raster, 100m hieght
+
+wind_raster <- raster("gwa3_250_power-density_100m.tif")
+wind_raster
+plot(wind_raster)
+```
