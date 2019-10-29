@@ -40,3 +40,81 @@ wind_raster <- raster("gwa3_250_power-density_100m.tif")
 wind_raster
 plot(wind_raster)
 ```
+
+
+(Nice job Jamie!)
+
+Here's exactly Patrick's code for how to do this just using this solar raster instead of his example raster:
+```{r solar_example}
+
+#make a raster defining the desired inclusion probabilities 
+#for the all locations available for sampling
+probrast<-solar_raster
+
+#inclusion probability for cells with value >=400 
+#will be 10 times that for cells with value <400
+## would probably skip this step unless there are real reasons to make the probabilities categorical like this
+## DEFINITELY make sure areas with no potential are 0 
+probrast[solar_raster>=400]<-10 
+probrast[solar_raster<400]<-1
+
+#normalise the probability raster by dividing by the sum of all inclusion weights:
+probrast<-probrast/sum(getValues(probrast), na.rm=T)
+
+#plot the raster of inclusion probabilities
+plot(probrast)
+
+####### Jamie I don't think this worked the same - it looks like all the values are zero; might have to do with the 400 but I'm not sure where that value came from.
+
+### get all the values in your probability raster as a vector 
+ x<-getValues(probrast)
+ #set NA cells in raster to zero
+ x[is.na(x)]<-0
+ 
+ ### sample from a list of cell IDs from 1:totala cells in raster -- size is number in sample, and prob is the probability of selecting any cell (values from probrast)
+ samp<-sample(nrow(probrast)*ncol(probrast), size=100, prob=x)
+ 
+## make a new raster to see what you sampled 
+ samprast<-probrast
+ 
+ ## brakets say turn all the cell IDs identified by 'samp' into 1
+ samprast[samp]<-1 
+ 
+ ## see how the sampled raster compares to the prob raster
+ plot(samprast)
+ s <- stack(probrast,samprast)
+ plot(s)
+
+ ### this will check to see how many cells from your sample you need to make your energy target
+ ## set threshold for TWh needed - 113,009 TWh
+ ## Based on  "Key World Energy Statistics 2019". IEA. 26 September 2019. Retrieved 27 October 2019.
+ thresh <- 113009
+ 
+ ### get the values from your energy potential map
+ v <- getValues(solar_raster)
+ 
+ ## subset those values according to your sample
+ v <- v[samp]
+ 
+ ## get a running total of summed energy delivered
+ v.sum <- cumsum(v)
+ 
+ ## check to see where in your sample you achieve the target
+ stop <- min(which(v.sum>thresh))
+  
+ ### make a new raster for final selected cells
+ selectrast<-solar_raster
+ 
+ ### set all cells in your sample (up to where you achieve energy target to 1)
+ selectrast[samp[1:stop]]<-1 
+  
+## see how it all looks!
+plot(selectrast)
+s2 <- stack(probrast,samprast,selectrast)
+plot(s2)
+
+
+# So the code runs but I don't know if this makes any sense...
+```
+
+>>>>>>> cf182c33f087a60b89424ee323fdcd7af75156be
