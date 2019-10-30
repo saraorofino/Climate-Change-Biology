@@ -46,6 +46,15 @@ repeat({
     break}
   
 })
+
+#Now mutate the dataframe to display TWh of energy instead of percents
+mix1 <- results %>% 
+  mutate(solar = (X1/ 100) * 153596,
+         wind = (X2/ 100) * 153596,
+         hydro = (X3/ 100) * 153596,
+         biofuel = (X4/ 100) * 153596) %>% 
+  select(5:8)
+
 ```
 These results seem pretty similar let's try another one where we vary the energy sources more even if that's unrealistic. 
 
@@ -83,7 +92,19 @@ repeat({
   
 })
 
+#Now mutate the dataframe to display TWh of energy instead of percents
+mix2 <- results_2 %>% 
+  mutate(solar = (X1/ 100) * 153596,
+         wind = (X2/ 100) * 153596,
+         hydro = (X3/ 100) * 153596,
+         biofuel = (X4/ 100) * 153596) %>% 
+  select(5:8)
+
 ```
 
 The second mix has way more variation. Might be good to use both if we get the chance.
+
+Final result of Step 1 is two energy mix dataframes each containing 1000 mixes, the number displayed is the number of TWh contributed by each energy source. This is the energy that needs to be "placed" on the maps in Step 3. 
+
+Step 2: Probability raster maps
 
