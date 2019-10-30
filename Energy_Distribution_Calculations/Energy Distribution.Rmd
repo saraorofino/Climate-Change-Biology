@@ -1,6 +1,6 @@
 ---
 title: "Energy Distribution"
-author: "Sara Orofino"
+author: "Sara Orofino and Jamie Miller"
 date: "10/3/2019"
 output: html_document
 ---
@@ -11,7 +11,7 @@ We can use this rmd to determine the latitudinal distribution of each energy mix
 First we need to get the rasters from everyone for global potential
 read in using readTIFF(source, native = TRUE) - native will turn it into a native raster we can plot
 
-```{r packages, echo = FALSE}
+```{r packages, include = FALSE}
 library(sp)
 #library(tiff)
 library(raster)
@@ -19,51 +19,64 @@ library(raster)
 library(rgdal)
 ```
 
-```{r read_data}
-# solar_raster <- system.file("~Documents/Github/Climate-Change-Biology/solar_potential.tif", package="raster")
-#This doesnt work... it shows up in the environment but its empty...
+```{r map projection}
+## Create map projection variable so maps are standardized.
+## Latitude/Longitude WGS84 (EPSG: 4326) 
+## Commonly used by organizations that provide GIS data for the entire globe or many countries. CRS used by Google Earth
 
-# JKM edits
-# changed system.file to raster
-# removed file pathway
-# removed package = "raster"
-# moved tif file to folder "Energy_Distribution_Calculations" because none of the pathway designations were working. 
-solar_raster <- raster("solar_potential.tif")
-solar_raster
-plot(solar_raster)
+wgs84 <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
 ```
 
+```{r read_data}
+## solar_raster from Indigo Bannister
+
+solar_raster <- raster("solar_potential.tif")
+solar_raster
+#plot(solar_raster)
+```
 
 ```{r read_data}
-#wind raster, 100m hieght
+## wind_raster, 100m height, from Maddie Berger
 
 wind_raster <- raster("gwa3_250_power-density_100m.tif")
 wind_raster
-#plot(wind_raster)
+#plot(wind_raster) ## the wind raster is quite large and takes a long time to plot. It plotted nicely.
 ```
 
 ```{r read_data}
-# hydro power shapefile, 
+## hydro power shapefile, from Lee Hannah
 
-# create an empty global raster
+## create an empty global raster
 r <- raster(nrows=360,ncols=720)
 
-# read in shapefile
+## read in shapefile
 shp <- shapefile("./hydropower_locations/locations.shp")
-#plot(shp)
+#plot(shp) ## the shapefile is quite large and takes a long time to plot. It plotted nicely and looks as expected.
 ```
 
-````{r rasterize the hydrraster}
-#convert shapefile to raster
+````{r rasterize the hydoraster}
+## convert shapefile to raster
 
-hydro_raster <- rasterize(shp,r,field="kWh_year_1")
+hydro_raster <- rasterize(shp,field='kWh_year_1',r)
 hydro_raster
 plot(hydro_raster)
 
+```
 
+```{r}
+head(shp)
+head(hydro_raster)
 ```
 
 
+
+```{r write tiff}
+## write raster to file for use in probability raster code
+
+writeRaster(hydro_raster, filename = "hydro_raster.tif", format = "GTiff")
+
+
+```
 
 
 (Nice job Jamie!)
@@ -71,27 +84,20 @@ plot(hydro_raster)
 Here's exactly Patrick's code for how to do this just using this solar raster instead of his example raster:
 ```{r solar_example}
 
-#make a raster defining the desired inclusion probabilities 
-#for the all locations available for sampling
+## make a raster defining the desired inclusion probabilities 
+## for the all locations available for sampling
 probrast<-solar_raster
 
-#inclusion probability for cells with value >=400 
-#will be 10 times that for cells with value <400
-## would probably skip this step unless there are real reasons to make the probabilities categorical like this
-## DEFINITELY make sure areas with no potential are 0 
-#probrast[solar_raster>=400]<-10 
-#probrast[solar_raster<400]<-1
-
-#normalise the probability raster by dividing by the sum of all inclusion weights:
+## normalise the probability raster by dividing by the sum of all inclusion weights:
 probrast<-probrast/sum(getValues(probrast), na.rm=T)
 
-#plot the raster of inclusion probabilities
+## plot the raster of inclusion probabilities
 plot(probrast)
 
 
 ### get all the values in your probability raster as a vector 
  x<-getValues(probrast)
- #set NA cells in raster to zero
+ ## set NA cells in raster to zero
  x[is.na(x)]<-0
  
  ### sample from a list of cell IDs from 1:totala cells in raster -- size is number in sample, and prob is the probability of selecting any cell (values from probrast)
@@ -136,14 +142,20 @@ plot(probrast)
 plot(selectrast)
 s2 <- stack(probrast,samprast,selectrast)
 plot(s2)
-
-
-# So the code runs but I don't know if this makes any sense...
 ```
 
 
 
+```{r}
+# code for stacking maps
 
 
+
+
+
+
+
+
+```
 
 
