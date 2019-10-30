@@ -50,36 +50,35 @@ wind_raster
 r <- raster(nrows=360,ncols=720)
 
 ## read in shapefile
-#shp <- shapefile("./hydropower_locations/locations.shp")
+shp <- shapefile("./hydropower_locations/locations.shp")
 #plot(shp) ## the shapefile is quite large and takes a long time to plot. It plotted nicely and looks as expected.
 
-shp_2 <- readOGR("./hydropower_locations/locations.shp")
+#shp_2 <- readOGR("./hydropower_locations/locations.shp")
 
 
 ```
 
-````{r rasterize the hydoraster}
+```{r rasterize the hydroraster}
+
 ## convert shapefile to raster
 
-hydro_raster <- rasterize(shp,r,`field='kWh_year_1')
+hydro_raster <- rasterize(shp,r,field='kWh_year_1',fun=sum)
 hydro_raster
 plot(hydro_raster)
 
-# This does not display the kWh_year_1 column.
-#################################
-
-hydro_raster_2 <- rasterize(shp_2,r,`field='kWh_year_1')
-hydro_raster_2
-plot(hydro_raster_2)
-
-# This does not work: Error: Incomplete expression: hydro_raster_2 <- rasterize(shp_2,r,`field='kWh_year_1')
+#THIS WORKS!
 
 ```
 
+
+
+
 ```{r}
 head(shp)
-head(shp_2)
+#head(shp_2)
 head(hydro_raster)
+
+shp
 ```
 
 
@@ -87,7 +86,7 @@ head(hydro_raster)
 ```{r write tiff}
 ## write raster to file for use in probability raster code
 
-writeRaster(hydro_raster, filename = "hydro_raster.tif", format = "GTiff")
+writeRaster(hydro_raster, filename = "hydro_raster.tif", format = "GTiff", overwrite=TRUE)
 
 ```
 
@@ -97,6 +96,7 @@ writeRaster(hydro_raster, filename = "hydro_raster.tif", format = "GTiff")
 
 hydro_raster_tf <- raster("hydro_raster.tif")
 hydro_raster_tf
+plot(hydro_raster_tf)
 
 
 ```
@@ -117,6 +117,10 @@ probrast<-probrast/sum(getValues(probrast), na.rm=T)
 ## plot the raster of inclusion probabilities
 plot(probrast)
 
+
+#########
+
+#Start loop here. In sequence.
 
 ### get all the values in your probability raster as a vector 
  x<-getValues(probrast)
@@ -141,6 +145,7 @@ plot(probrast)
  ## set threshold for TWh needed -- this will come from your random energy draw
  ## Based on  "Key World Energy Statistics 2019". IEA. 26 September 2019. Retrieved 27 October 2019.
  ## 153956 TWh some from Our World in Data, 2017 data.
+ ## This will be the only variable in the loop.
  thresh <- 153596
  
  ### get the values from your energy potential map
@@ -175,7 +180,7 @@ Key for looping through the scenarios is use the energy draw to set your thresho
 
 # 
 
-
+raster(mask=....)
 
 
 
