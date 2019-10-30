@@ -14,7 +14,7 @@ library(tidyverse)
 Alright here we go with the running of this model...
 
 Step 1: Energy mixes 
-```{r}
+```{r mix_1}
 # set up a results data frame to write successful results 
 results <- data.frame(matrix(ncol=4,nrow=1000))
 
@@ -24,7 +24,7 @@ x <-1
 ## set up a repeater function so it goes until a condition is met
 repeat({
   
-  ## sample integer between 0 and 100 -- if certain energy sources have limits can define the range in the sample() function
+  ## scale up current percentage of energy by sector in 2017 to be able to meet 100% of energy demand - refer to table in methods for the 2017 percentages 
   s <- sample(0:3,1)
   w <- sample(0:7,1)
   b <- sample(0:70,1)
@@ -49,4 +49,41 @@ repeat({
 ```
 These results seem pretty similar let's try another one where we vary the energy sources more even if that's unrealistic. 
 
+```{r mix_2}
+### Second set of 1000 mixes 
+# set up a results data frame to write successful results 
+results_2 <- data.frame(matrix(ncol=4,nrow=1000))
+
+## set a counter variable
+x <-1 
+
+## set up a repeater function so it goes until a condition is met
+repeat({
+  
+  ## increase the potential of all energy types to try and diversify the mixes. Make every type 5x higher (up to 100 maximum)
+  s <- sample(0:15,1)
+  w <- sample(0:35,1)
+  b <- sample(0:100,1)
+  h <- sample(0:100,1)
+  
+  ## find the sum of the mix
+  s <- c(s, w, b, h)
+  ssum <- sum(s)
+  
+  ## write the mix if it equals 100
+  if (ssum==100){
+    results_2[x,1:4]<-s
+    
+    ## increase the counter to keep track of successful mixes
+    x<-x+1}
+  
+  ## break after 100 mixes written
+  if (x>1000){
+    break}
+  
+})
+
+```
+
+The second mix has way more variation. Might be good to use both if we get the chance.
 
