@@ -1,0 +1,52 @@
+---
+title: "Model_run"
+author: "Sara Orofino"
+date: "10/29/2019"
+output: html_document
+---
+
+```{r packages}
+#packages
+library(tidyverse)
+
+```
+
+Alright here we go with the running of this model...
+
+Step 1: Energy mixes 
+```{r}
+# set up a results data frame to write successful results 
+results <- data.frame(matrix(ncol=4,nrow=1000))
+
+## set a counter variable
+x <-1 
+
+## set up a repeater function so it goes until a condition is met
+repeat({
+  
+  ## sample integer between 0 and 100 -- if certain energy sources have limits can define the range in the sample() function
+  s <- sample(0:3,1)
+  w <- sample(0:7,1)
+  b <- sample(0:70,1)
+  h <- sample(0:26,1)
+  
+  ## find the sum of the mix
+  s <- c(s, w, b, h)
+  ssum <- sum(s)
+  
+  ## write the mix if it equals 100
+  if (ssum==100){
+    results[x,1:4]<-s
+    
+    ## increase the counter to keep track of successful mixes
+    x<-x+1}
+  
+  ## break after 100 mixes written
+  if (x>1000){
+    break}
+  
+})
+```
+These results seem pretty similar let's try another one where we vary the energy sources more even if that's unrealistic. 
+
+
