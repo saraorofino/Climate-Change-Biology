@@ -11,11 +11,12 @@ We can use this rmd to determine the latitudinal distribution of each energy mix
 First we need to get the rasters from everyone for global potential
 read in using readTIFF(source, native = TRUE) - native will turn it into a native raster we can plot
 
-```{r packages}
+```{r packages, echo = FALSE}
 library(sp)
 #library(tiff)
 library(raster)
-#library(rgdal)
+#install.packages("rgdal")
+library(rgdal)
 ```
 
 ```{r read_data}
@@ -38,8 +39,31 @@ plot(solar_raster)
 
 wind_raster <- raster("gwa3_250_power-density_100m.tif")
 wind_raster
-plot(wind_raster)
+#plot(wind_raster)
 ```
+
+```{r read_data}
+# hydro power shapefile, 
+
+# create an empty global raster
+r <- raster(nrows=360,ncols=720)
+
+# read in shapefile
+shp <- shapefile("./hydropower_locations/locations.shp")
+#plot(shp)
+```
+
+````{r rasterize the hydrraster}
+#convert shapefile to raster
+
+hydro_raster <- rasterize(shp,r,field="kWh_year_1")
+hydro_raster
+plot(hydro_raster)
+
+
+```
+
+
 
 
 (Nice job Jamie!)
@@ -55,8 +79,8 @@ probrast<-solar_raster
 #will be 10 times that for cells with value <400
 ## would probably skip this step unless there are real reasons to make the probabilities categorical like this
 ## DEFINITELY make sure areas with no potential are 0 
-probrast[solar_raster>=400]<-10 
-probrast[solar_raster<400]<-1
+#probrast[solar_raster>=400]<-10 
+#probrast[solar_raster<400]<-1
 
 #normalise the probability raster by dividing by the sum of all inclusion weights:
 probrast<-probrast/sum(getValues(probrast), na.rm=T)
@@ -64,7 +88,6 @@ probrast<-probrast/sum(getValues(probrast), na.rm=T)
 #plot the raster of inclusion probabilities
 plot(probrast)
 
-####### Jamie I don't think this worked the same - it looks like all the values are zero; might have to do with the 400 but I'm not sure where that value came from.
 
 ### get all the values in your probability raster as a vector 
  x<-getValues(probrast)
@@ -88,7 +111,8 @@ plot(probrast)
  ### this will check to see how many cells from your sample you need to make your energy target
  ## set threshold for TWh needed - 113,009 TWh
  ## Based on  "Key World Energy Statistics 2019". IEA. 26 September 2019. Retrieved 27 October 2019.
- thresh <- 113009
+ ## 153956 TWh some from Our World in Data, 2017 data.
+ thresh <- 153596
  
  ### get the values from your energy potential map
  v <- getValues(solar_raster)
@@ -105,7 +129,7 @@ plot(probrast)
  ### make a new raster for final selected cells
  selectrast<-solar_raster
  
- ### set all cells in your sample (up to where you achieve energy target to 1)
+ ### set all cells in your sample (up to where you achieve energy target to 1); references cell numbers in 'samp'
  selectrast[samp[1:stop]]<-1 
   
 ## see how it all looks!
@@ -117,4 +141,9 @@ plot(s2)
 # So the code runs but I don't know if this makes any sense...
 ```
 
->>>>>>> cf182c33f087a60b89424ee323fdcd7af75156be
+
+
+
+
+
+
