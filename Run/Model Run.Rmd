@@ -53,7 +53,7 @@ mix1 <- results %>%
          wind = (X2/ 100) * 153596,
          hydro = (X3/ 100) * 153596,
          biofuel = (X4/ 100) * 153596) %>% 
-  select(5:8)
+  dplyr::select(5:8)
 
 ```
 These results seem pretty similar let's try another one where we vary the energy sources more even if that's unrealistic. 
@@ -98,8 +98,9 @@ mix2 <- results_2 %>%
          wind = (X2/ 100) * 153596,
          hydro = (X3/ 100) * 153596,
          biofuel = (X4/ 100) * 153596) %>% 
-  select(5:8)
+  dplyr::select(5:8)
 
+#Save as csv
 ```
 
 The second mix has way more variation. Might be good to use both if we get the chance.
@@ -107,4 +108,19 @@ The second mix has way more variation. Might be good to use both if we get the c
 Final result of Step 1 is two energy mix dataframes each containing 1000 mixes, the number displayed is the number of TWh contributed by each energy source. This is the energy that needs to be "placed" on the maps in Step 3. 
 
 Step 2: Probability raster maps
+```{r prob_rasters}
+
+```
+
+
+
+Step 3: Distribute the Energy
+```{r energy_dist}
+#within your loop - use for(i in 1:1000)
+#thresh.solar <- csv[i,1]
+#thresh.wind <- csv[1,2]
+
+# Replicate the code chunk four times - one for each energy source. BUT ALL GOES IN ONE LOOP
+#write raster at the end!
+```
 
