@@ -50,21 +50,35 @@ wind_raster
 r <- raster(nrows=360,ncols=720)
 
 ## read in shapefile
-shp <- shapefile("./hydropower_locations/locations.shp")
+#shp <- shapefile("./hydropower_locations/locations.shp")
 #plot(shp) ## the shapefile is quite large and takes a long time to plot. It plotted nicely and looks as expected.
+
+shp_2 <- readOGR("./hydropower_locations/locations.shp")
+
+
 ```
 
 ````{r rasterize the hydoraster}
 ## convert shapefile to raster
 
-hydro_raster <- rasterize(shp,field='kWh_year_1',r)
+hydro_raster <- rasterize(shp,r,`field='kWh_year_1')
 hydro_raster
 plot(hydro_raster)
+
+# This does not display the kWh_year_1 column.
+#################################
+
+hydro_raster_2 <- rasterize(shp_2,r,`field='kWh_year_1')
+hydro_raster_2
+plot(hydro_raster_2)
+
+# This does not work: Error: Incomplete expression: hydro_raster_2 <- rasterize(shp_2,r,`field='kWh_year_1')
 
 ```
 
 ```{r}
 head(shp)
+head(shp_2)
 head(hydro_raster)
 ```
 
@@ -74,6 +88,15 @@ head(hydro_raster)
 ## write raster to file for use in probability raster code
 
 writeRaster(hydro_raster, filename = "hydro_raster.tif", format = "GTiff")
+
+```
+
+
+```{r}
+## read in hydro_raster tif file
+
+hydro_raster_tf <- raster("hydro_raster.tif")
+hydro_raster_tf
 
 
 ```
@@ -100,7 +123,7 @@ plot(probrast)
  ## set NA cells in raster to zero
  x[is.na(x)]<-0
  
- ### sample from a list of cell IDs from 1:totala cells in raster -- size is number in sample, and prob is the probability of selecting any cell (values from probrast)
+ ### sample from a list of cell IDs from 1:total cells in raster -- size is number in sample, and prob is the probability of selecting any cell (values from probrast)
  samp<-sample(nrow(probrast)*ncol(probrast), size=100, prob=x)
  
 ## make a new raster to see what you sampled 
@@ -115,7 +138,7 @@ plot(probrast)
  plot(s)
 
  ### this will check to see how many cells from your sample you need to make your energy target
- ## set threshold for TWh needed - 113,009 TWh
+ ## set threshold for TWh needed -- this will come from your random energy draw
  ## Based on  "Key World Energy Statistics 2019". IEA. 26 September 2019. Retrieved 27 October 2019.
  ## 153956 TWh some from Our World in Data, 2017 data.
  thresh <- 153596
@@ -123,19 +146,20 @@ plot(probrast)
  ### get the values from your energy potential map
  v <- getValues(solar_raster)
  
- ## subset those values according to your sample
+ ## subset those values according to your sample -- the 'samp' variable is a list of cell numbers -- so you are getting a randomized list of values from your energy potential raster with greater potential more likely to be chosen first
  v <- v[samp]
  
- ## get a running total of summed energy delivered
+ ## get a running total of summed energy delivered -- this simply sums the random energy values above -- purpose is to see how many of those random pixels  you need to achieve your target
  v.sum <- cumsum(v)
  
- ## check to see where in your sample you achieve the target
+ ## get a running total of summed energy delivered -- this simply sums the random energy values above -- purpose is to see how many of those random pixels  you need to achieve your target
  stop <- min(which(v.sum>thresh))
   
- ### make a new raster for final selected cells
+ ### make a new blank raster for final selected cells
  selectrast<-solar_raster
+ selectrast[]<-NA ### this wasn't in the code I sent but needs to be
  
- ### set all cells in your sample (up to where you achieve energy target to 1); references cell numbers in 'samp'
+ ### set all cells in your sample (up to where you achieve energy target to 1) -- this grabs all the cell numbers you need to achieve the energy target and sets those cells to 1
  selectrast[samp[1:stop]]<-1 
   
 ## see how it all looks!
@@ -144,12 +168,12 @@ s2 <- stack(probrast,samprast,selectrast)
 plot(s2)
 ```
 
-
+Key for looping through the scenarios is use the energy draw to set your threshold for the total TWh you need from that energy source.
 
 ```{r}
 # code for stacking maps
 
-
+# 
 
 
 
