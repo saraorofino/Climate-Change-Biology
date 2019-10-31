@@ -125,7 +125,7 @@ mix2 <- read_csv("mix2.csv")
 Only need to create the probability raster map once for each energy source.
 ```{r prob_rasters}
 
-############### SOlar
+############### Solar
 
 ## make a raster defining the desired inclusion probabilities 
 ## for the all locations available for sampling

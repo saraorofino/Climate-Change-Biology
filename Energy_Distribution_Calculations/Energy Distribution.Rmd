@@ -38,13 +38,16 @@ solar_raster
 ```{r read_data}
 ## wind_raster, 100m height, from Maddie Berger
 
-wind_raster_max <- raster("gwa3_250_power-density_100m.tif")
+#wind_raster_max <- raster("gwa3_250_power-density_100m.tif")
 #wind_raster_max
 #plot(wind_raster) ## the wind raster is quite large and takes a long time to plot. It plotted nicely.
 
 
-writeRaster(wind_raster_max, filename = "wind_raster.tif", format = "GTiff", options="COMPRESS=DEFLATE", overwrite=TRUE)
+#writeRaster(wind_raster_max, filename = "wind_raster.tif", format = "GTiff", options="COMPRESS=DEFLATE", overwrite=TRUE)
 
+## The above code was taking an hour and still had not compressed the tif file. I used the code below in the Git Bash Shell to create a new compressed GTiff file.
+
+#gdalwarp -of GTiff -co COMPRESS=DEFLATE -dstalpha gwa3_250_power-density_100m.tif wind_raster.tif 
 
 ```
 
@@ -52,10 +55,10 @@ writeRaster(wind_raster_max, filename = "wind_raster.tif", format = "GTiff", opt
 ## hydro power shapefile, from Lee Hannah
 
 ## create an empty global raster
-r <- raster(nrows=360,ncols=720)
+#r <- raster(nrows=360,ncols=720)
 
 ## read in shapefile
-shp <- shapefile("./hydropower_locations/locations.shp")
+#shp <- shapefile("./hydropower_locations/locations.shp")
 #plot(shp) ## the shapefile is quite large and takes a long time to plot. It plotted nicely and looks as expected.
 
 #shp_2 <- readOGR("./hydropower_locations/locations.shp")
