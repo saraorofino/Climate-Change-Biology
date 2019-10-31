@@ -209,7 +209,7 @@ for(i in 1:5){
  stop <- min(which(vs.sum>thresh_s)) #stop once threshold is met
   
  selectrast_s<-solar_raster #make a new blank raster for final selected cells
- #selectrast_s[]<-NA 
+ selectrast_s[]<-NA 
  
  selectrast_s[samp_s[1:stop]]<-1 #set all cells in your sample (up to where you achieve energy target to 1)
   
@@ -244,7 +244,7 @@ for(i in 1:5){
  stop <- min(which(vh.sum>thresh_h)) #stop once threshold is met
   
  selectrast_h<-hydro_raster #make a new blank raster for final selected cells
- #selectrast_s[]<-NA 
+ selectrast_h[]<-NA 
  
  selectrast_h[samp_h[1:stop]]<-1 #set all cells in your sample (up to where you achieve energy target to 1)
   
