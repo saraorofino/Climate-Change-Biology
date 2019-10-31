@@ -8,6 +8,7 @@ output: html_document
 ```{r packages}
 #packages
 library(tidyverse)
+library(raster)
 
 ```
 
@@ -48,13 +49,15 @@ repeat({
 })
 
 #Now mutate the dataframe to display TWh of energy instead of percents
-mix1 <- results %>% 
+mix_1 <- results %>% 
   mutate(solar = (X1/ 100) * 153596,
          wind = (X2/ 100) * 153596,
          hydro = (X3/ 100) * 153596,
          biofuel = (X4/ 100) * 153596) %>% 
   dplyr::select(5:8)
 
+#Write csv for later:
+write.csv(mix1, "mix1.csv", row.names = FALSE)
 ```
 These results seem pretty similar let's try another one where we vary the energy sources more even if that's unrealistic. 
 
@@ -93,14 +96,15 @@ repeat({
 })
 
 #Now mutate the dataframe to display TWh of energy instead of percents
-mix2 <- results_2 %>% 
+mix_2 <- results_2 %>% 
   mutate(solar = (X1/ 100) * 153596,
          wind = (X2/ 100) * 153596,
          hydro = (X3/ 100) * 153596,
          biofuel = (X4/ 100) * 153596) %>% 
   dplyr::select(5:8)
 
-#Save as csv
+#Write csv
+write.csv(mix_2, "mix2.csv", row.names = FALSE)
 ```
 
 The second mix has way more variation. Might be good to use both if we get the chance.
@@ -108,19 +112,106 @@ The second mix has way more variation. Might be good to use both if we get the c
 Final result of Step 1 is two energy mix dataframes each containing 1000 mixes, the number displayed is the number of TWh contributed by each energy source. This is the energy that needs to be "placed" on the maps in Step 3. 
 
 Step 2: Probability raster maps
+```{r read_in}
+# Read in rasters:
+solar_raster <- raster("solar_potential.tif")
+wind_raster <- raster("wind_raster.tif")
+hydro_raster <- raster("hydro_raster.tif")
+
+mix1 <- read_csv("mix1.csv")
+mix2 <- read_csv("mix2.csv") 
+```
+
+Only need to create the probability raster map once for each energy source.
 ```{r prob_rasters}
 
+############### SOlar
+
+## make a raster defining the desired inclusion probabilities 
+## for the all locations available for sampling
+probrast_s<-solar_raster
+
+## normalise the probability raster by dividing by the sum of all inclusion weights:
+probrast_s<-probrast_s/sum(getValues(probrast_s), na.rm=T)
+
+## plot the raster of inclusion probabilities
+plot(probrast_s)
+
+############## Wind
+
+probrast_w<-wind_raster
+
+probrast_w<-probrast_w/sum(getValues(probrast_w), na.rm=T)
+
+plot(probrast_w)
+
+############## Hydro
+
+probrast_h<-hydro_raster
+
+probrast_h<-probrast_h/sum(getValues(probrast_h), na.rm=T)
+
+plot(probrast_h)
+
+############# Biofuel
+
+probrast_b<-biofuel_raster
+
+probrast_b<-probrast_b/sum(getValues(probrast_b), na.rm=T)
+
+plot(probrast_b)
 ```
 
 
-
-Step 3: Distribute the Energy
+Step 3: Distribute the Energy for MIX 2
 ```{r energy_dist}
-#within your loop - use for(i in 1:1000)
-#thresh.solar <- csv[i,1]
-#thresh.wind <- csv[1,2]
 
-# Replicate the code chunk four times - one for each energy source. BUT ALL GOES IN ONE LOOP
-#write raster at the end!
+### Beginning a loop to distribute energy around the globe:
+
+for(i in 1:5){
+  
+  #Set thresholds for each type based on the TWh from the mixes
+  thresh.solar <- mix2[i,1]
+  thresh.wind <- mix2[i,2]
+  thresh.hydro <- mix2[i,3]
+  thresh.bio <- mix2[i,4]
+  
+  # Start with solar (s):
+  
+ xs<-getValues(probrast_s) #get all the values in your probability raster as a vector
+ 
+ xs[is.na(xs)]<-0 #set NA cells in raster to zero
+ 
+ ### sample from a list of cell IDs from 1:total cells in raster -- size is number in sample, and prob is the probability of selecting any cell (values from probrast)
+ samp_s<-sample(nrow(probrast_s)*ncol(probrast_s), size=100, prob=xs)
+ 
+ samprast_s<-probrast_s #make a new raster to see what was sampled
+ 
+ samprast_s[samp_s]<-1 #brackets say turn all the cell IDs identified by 'samp' into 1
+
+ thresh_s <- thresh.solar #use the TWh value from each mix 
+ 
+ 
+ vs <- getValues(solar_raster) #get the values from your energy potential map
+ 
+ ## subset those values according to your sample -- get a randomized list of values from your energy potential raster with greater potential more likely to be chosen first
+ vs <- vs[samp_s]
+ 
+ vs.sum <- cumsum(vs) #get a running total of summed energy delivered
+ stop <- min(which(vs.sum>thresh_s)) #stop once threshold is met
+  
+ selectrast_s<-solar_raster #make a new blank raster for final selected cells
+ #selectrast_s[]<-NA 
+ 
+ selectrast_s[samp_s[1:stop]]<-1 #set all cells in your sample (up to where you achieve energy target to 1)
+  
+## see how it all looks!
+ plot(selectrast_s)
+
+ 
+ 
+}
+
+
 ```
 
