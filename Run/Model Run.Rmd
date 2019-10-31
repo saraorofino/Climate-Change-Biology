@@ -139,11 +139,11 @@ plot(probrast_s)
 
 ############## Wind
 
-probrast_w<-wind_raster
+#probrast_w<-wind_raster
 
-probrast_w<-probrast_w/sum(getValues(probrast_w), na.rm=T)
+#probrast_w<-probrast_w/sum(getValues(probrast_w), na.rm=T)
 
-plot(probrast_w)
+#plot(probrast_w)
 
 ############## Hydro
 
@@ -155,11 +155,11 @@ plot(probrast_h)
 
 ############# Biofuel
 
-probrast_b<-biofuel_raster
+#probrast_b<-biofuel_raster
 
-probrast_b<-probrast_b/sum(getValues(probrast_b), na.rm=T)
+#probrast_b<-probrast_b/sum(getValues(probrast_b), na.rm=T)
 
-plot(probrast_b)
+#plot(probrast_b)
 ```
 
 
@@ -183,7 +183,7 @@ for(i in 1:5){
  xs[is.na(xs)]<-0 #set NA cells in raster to zero
  
  ### sample from a list of cell IDs from 1:total cells in raster -- size is number in sample, and prob is the probability of selecting any cell (values from probrast)
- samp_s<-sample(nrow(probrast_s)*ncol(probrast_s), size=100, prob=xs)
+ samp_s<-sample(nrow(probrast_s)*ncol(probrast_s), size=5, prob=xs)
  
  samprast_s<-probrast_s #make a new raster to see what was sampled
  

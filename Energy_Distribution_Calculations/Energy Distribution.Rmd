@@ -38,9 +38,14 @@ solar_raster
 ```{r read_data}
 ## wind_raster, 100m height, from Maddie Berger
 
-wind_raster <- raster("gwa3_250_power-density_100m.tif")
-wind_raster
+wind_raster_max <- raster("gwa3_250_power-density_100m.tif")
+#wind_raster_max
 #plot(wind_raster) ## the wind raster is quite large and takes a long time to plot. It plotted nicely.
+
+
+writeRaster(wind_raster_max, filename = "wind_raster.tif", format = "GTiff", options="COMPRESS=DEFLATE", overwrite=TRUE)
+
+
 ```
 
 ```{r read_data}
@@ -178,9 +183,13 @@ Key for looping through the scenarios is use the energy draw to set your thresho
 ```{r}
 # code for stacking maps
 
-# 
+# Is this how masking and stacking works?
 
-raster(mask=....)
+r3 <- mask(rs,rw)
+r5 <- mask(r3,rh)
+r7 <- mask(r5,rb)
+r_final <- stack(rs,r3,r5,r7)
+
 
 
 
