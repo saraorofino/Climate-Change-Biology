@@ -5,7 +5,7 @@ date: "10/29/2019"
 output: html_document
 ---
 
-```{r packages}
+```{r packages, include = FALSE}
 #packages
 library(tidyverse)
 library(raster)
@@ -14,7 +14,7 @@ library(raster)
 
 Alright here we go with the running of this model...
 
-Step 1: Energy mixes 
+Step 1: Energy mixes - DO NOT RUN
 ```{r mix_1}
 # set up a results data frame to write successful results 
 results <- data.frame(matrix(ncol=4,nrow=1000))
@@ -57,7 +57,7 @@ mix_1 <- results %>%
   dplyr::select(5:8)
 
 #Write csv for later:
-write.csv(mix1, "mix1.csv", row.names = FALSE)
+#write.csv(mix1, "mix1.csv", row.names = FALSE)
 ```
 These results seem pretty similar let's try another one where we vary the energy sources more even if that's unrealistic. 
 
