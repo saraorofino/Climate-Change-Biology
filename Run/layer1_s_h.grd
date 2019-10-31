@@ -1,0 +1,26 @@
+[general]
+creator=R package 'raster'
+created=2019-10-30 19:44:50
+[georeference]
+nrows=115
+ncols=360
+xmin=-180
+ymin=-55
+xmax=180
+ymax=60
+projection=+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0
+[data]
+datatype=FLT4S
+byteorder=little
+nbands=1
+bandorder=BIL
+categorical=FALSE
+minvalue=12263
+maxvalue=157510862592
+nodatavalue=-3.4e+38
+[legend]
+legendtype=
+values=
+color=
+[description]
+layername=hydro_raster
