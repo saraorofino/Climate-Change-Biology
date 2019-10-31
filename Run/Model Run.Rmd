@@ -163,7 +163,7 @@ plot(probrast_b)
 ```
 
 
-Step 3: Distribute the Energy for MIX 2
+Step 3: Distribute the Energy for MIX 2 (because its more interesting and time is limited)
 ```{r energy_dist}
 
 ### Beginning a loop to distribute energy around the globe:
