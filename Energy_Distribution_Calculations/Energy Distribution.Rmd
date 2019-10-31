@@ -25,6 +25,8 @@ library(rgdal)
 ## Commonly used by organizations that provide GIS data for the entire globe or many countries. CRS used by Google Earth
 
 wgs84 <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+
+# all rasters are in this coordinate system already
 ```
 
 ```{r read_data}
@@ -38,8 +40,8 @@ solar_raster
 ```{r read_data}
 ## wind_raster, 100m height, from Maddie Berger
 
-#wind_raster_max <- raster("gwa3_250_power-density_100m.tif")
-#wind_raster_max
+wind_raster_max <- raster("gwa3_250_power-density_100m.tif")
+wind_raster_max
 #plot(wind_raster) ## the wind raster is quite large and takes a long time to plot. It plotted nicely.
 
 
@@ -79,8 +81,6 @@ plot(hydro_raster)
 ```
 
 
-
-
 ```{r}
 head(shp)
 #head(shp_2)
@@ -88,8 +88,6 @@ head(hydro_raster)
 
 shp
 ```
-
-
 
 ```{r write tiff}
 ## write raster to file for use in probability raster code
@@ -104,7 +102,7 @@ writeRaster(hydro_raster, filename = "hydro_raster.tif", format = "GTiff", overw
 
 hydro_raster_tf <- raster("hydro_raster.tif")
 hydro_raster_tf
-plot(hydro_raster_tf)
+#plot(hydro_raster_tf)
 
 
 ```
