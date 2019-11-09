@@ -115,7 +115,7 @@ Step 2: Probability raster maps
 ```{r read_in}
 # Read in rasters:
 solar_raster <- raster("solar_potential.tif")
-wind_raster <- raster("wind_raster.tif") #resampled the origical 13.5GB tif file in QGIS. File is now 649KB and pixel size is 0.5.
+wind_raster <- raster("wind_raster.tif") # resampled the origical 13.5GB tif file in QGIS, original pixel size was 0.0025. File is now 649KB and pixel size is 0.5.
 hydro_raster <- raster("hydro_raster.tif")
 biofuels_raster <- raster("biofuel_potential_twh.tif")
 
@@ -125,6 +125,12 @@ hydro=mix2[,3]
 max_hydro=cellStats(hydro_raster,sum)/10^9
 hydro[hydro>max_hydro]=max_hydro-1000
 mix2[,3]=hydro
+
+# check cellStats(raster,sum)
+cellStats(biofuels_raster,sum)  # 2079.345
+cellStats(wind_raster,sum)  # 27757204
+cellStats(solar_raster,sum)  # 2.29203e+11
+cellStats(hydro_raster,sum)  # 4.853071e+13
 
 # Check extents of rasters for masking:
 extent(solar_raster) #xmin-max -180 - 180; ymin-max -55 - 60
@@ -192,8 +198,8 @@ Step 3: Distribute the Energy for MIX 2 (because its more interesting and time i
 
 ### Beginning a loop to distribute energy around the globe:
 
-for(i in 1:1){
-#{ i=1 
+#for(i in 1:1){
+{ i=1 
   #Set thresholds for each type based on the TWh from the mixes
   thresh.solar <- mix2[i,1]
   thresh.wind <- mix2[i,2]
@@ -203,7 +209,7 @@ for(i in 1:1){
   #thresh.solar=thresh.solar*10^9
   #thresh.hydro=thresh.hydro*10^9
   
-  ##### Start with solar (s):
+  ##### Solar (s):
   
  xs<-getValues(probrast_s) #get all the values in your probability raster as a vector
  
@@ -221,28 +227,27 @@ for(i in 1:1){
 
  thresh_s <- thresh.solar #use the TWh value from each mix 
  
- 
  vs <- getValues(solar_raster) #get the values from your energy potential map
  
  ## subset those values according to your sample -- get a randomized list of values from your energy potential raster with greater potential more likely to be chosen first
  vs <- vs[samp_s]
  
  vs.sum <- cumsum(vs) #get a running total of summed energy delivered
- stop <- min(which(vs.sum>thresh_s)) #stop once threshold is met
+ stop_s <- min(which(vs.sum>thresh_s)) #stop once threshold is met
   
  selectrast_s<-solar_raster #make a new blank raster for final selected cells
  selectrast_s[]<-0 
  
- selectrast_s[samp_s[1:stop]]<-1 #set all cells in your sample (up to where you achieve energy target to 1)
+ selectrast_s[samp_s[1:stop_s]]<-1 #set all cells in your sample (up to where you achieve energy target to 1)
   
 ## see how it all looks!
 # plot(selectrast_s)
 
  #mask the output of the solar sample raster from the probability raster for hydro
  #set the masked values to zero
- layer1_s_h <- mask(probrast_h, selectrast_s, maskvalue = 1, updatevalue=0) 
+# layer1_s_h <- mask(probrast_h, selectrast_s, maskvalue = 1, updatevalue=0) 
  
- ###### Now hydro (h) - since this is the next raster we have that works
+ ###### Hydro (h)
  
   xh<-getValues(probrast_h) #get all the values in your probability raster as a vector
  
@@ -265,48 +270,48 @@ for(i in 1:1){
  vh <- vh[samp_h]
  
  vh.sum <- cumsum(vh) #get a running total of summed energy delivered
- #stop <- min(which(vh.sum>thresh_h)) #stop once threshold is met
- stop <-10000 
+ stop_h <- min(which(vh.sum>thresh_h)) #stop once threshold is met
+ #stop <-10000 
  
  selectrast_h<-hydro_raster #make a new blank raster for final selected cells
  selectrast_h[]<-0 
  
- selectrast_h[samp_h[1:stop]]<-2 #set all cells in your sample (up to where you achieve energy target to 1)
+ selectrast_h[samp_h[1:stop_h]]<-2 #set all cells in your sample (up to where you achieve energy target to 1)
  
  #Hydro = 2, wind = 3, 4 = biofuels
  
  ###### Wind (w)
  
-  xw<-getValues(probrast_w) #get all the values in your probability raster as a vector
+ # xw<-getValues(probrast_w) #get all the values in your probability raster as a vector
  
- xw[is.na(xw)]<-0 #set NA cells in raster to zero
+# xw[is.na(xw)]<-0 #set NA cells in raster to zero
  
-  ncellw <- length(which(xw!=0))
+#  ncellw <- length(which(xw!=0))
  
  ### sample from a list of cell IDs from 1:total cells in raster -- size is number in sample, and prob is the probability of selecting any cell (values from probrast)
- samp_w<-sample(nrow(probrast_w)*ncol(probrast_w), size=ncellw, prob=xw)
+# samp_w<-sample(nrow(probrast_w)*ncol(probrast_w), size=ncellw, prob=xw)
  
- samprast_w<-probrast_w #make a new raster to see what was sampled
+# samprast_w<-probrast_w #make a new raster to see what was sampled
  
- samprast_w[samp_w]<-1 #brackets say turn all the cell IDs identified by 'samp' into 1
+# samprast_w[samp_w]<-1 #brackets say turn all the cell IDs identified by 'samp' into 1
 
- thresh_w <- thresh.wind #use the TWh value from each mix 
+# thresh_w <- thresh.wind #use the TWh value from each mix 
  
- vw <- getValues(wind_raster) #get the values from your energy potential map
+# vw <- getValues(wind_raster) #get the values from your energy potential map
  
  ## subset those values according to your sample -- get a randomized list of values from your energy potential raster with greater potential more likely to be chosen first
- vw <- vw[samp_w]
+# vw <- vw[samp_w]
  
- vw.sum <- cumsum(vw) #get a running total of summed energy delivered
- #stop <- min(which(vh.sum>thresh_h)) #stop once threshold is met
- stop <-10000 
+# vw.sum <- cumsum(vw) #get a running total of summed energy delivered
+# stop_w <- min(which(vw.sum>thresh_w)) #stop once threshold is met
+## stop <-10000 
  
- selectrast_w<-wind_raster #make a new blank raster for final selected cells
- selectrast_w[]<-0 
+# selectrast_w<-wind_raster #make a new blank raster for final selected cells
+# selectrast_w[]<-0 
  
- selectrast_w[samp_w[1:stop]]<-3 #set all cells in your sample (up to where you achieve energy target to 1)
+# selectrast_w[samp_w[1:stop_w]]<-3 #set all cells in your sample (up to where you achieve energy target to 1)
  
- #Hydro = 2, wind = 3, 4 = biofuels
+# #Hydro = 2, wind = 3, 4 = biofuels
  
  ###### Biofuels (b)
  
@@ -331,26 +336,26 @@ for(i in 1:1){
  vb <- vb[samp_b]
  
  vb.sum <- cumsum(vb) #get a running total of summed energy delivered
- #stop <- min(which(vh.sum>thresh_h)) #stop once threshold is met
- stop <-10000 
+ stop_b <- min(which(vb.sum>thresh_b)) #stop once threshold is met
+ #stop <-10000 
  
  selectrast_b<-biofuels_raster #make a new blank raster for final selected cells
  selectrast_b[]<-0 
  
- selectrast_b[samp_b[1:stop]]<-4 #set all cells in your sample (up to where you achieve energy target to 1)
+ selectrast_b[samp_b[1:stop_b]]<-3 #set all cells in your sample (up to where you achieve energy target to 1)
  
  #Hydro = 2, wind = 3, 4 = biofuels
  
   
 ## see how it all looks!
- #plot(selectrast_h)
+ #plot(selectrast_w)
 
  #mask the output of the hydro sample raster from the probability raster for wind
  #set the masked values to zero
 # layer2_h_s <- mask(probrast_w, layer1_s_h, maskvalue = 0) 
  
  
- combined <- selectrast_h+selectrast_w+selectrast_s+selectrast_b
+ combined <- selectrast_s+selectrast_h+selectrast_b#+selectrast_w
  plot(combined)
  
  writeRaster(combined,paste0("C:/Users/Jamie K/Documents/UCSB/Fall 2019/ESM 240 Climate Change Biology/Term Paper/team_paper/final/final_map",i,".tif"),overwrite=TRUE)
@@ -358,6 +363,10 @@ for(i in 1:1){
  
 }
 
+
+# Error: no non-missing arguments to min; returning InfError in 1:stop_w : result would be too long a vector
+# Commented out wind portion
+# Tried to run current code. After an hour and 15 minutes it timed out. I don't know if the code is stuck in a death loop or if it is just taking a long time to create the map.
 
 ```
 
